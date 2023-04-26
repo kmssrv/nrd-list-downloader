@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# fork of nrd-list-downloader
+# https://github.com/kmssrv/nrd-list-downloader
+# Script generates a pure .csv file ready to use in Kaspersky CyberTrace. 
+
 # nrd-list-downloader
 # https://github.com/PeterDaveHello/nrd-list-downloader
 # Copyright (C) 2022 ~ Peter Dave Hello
@@ -68,7 +72,7 @@ echo.Cyan "NRD list of the last $DAY_RANGE days will be downloaded."
 
 function insert_into_temp_file() { echo "$*" >> "$TEMP_FILE"; }
 
-insert_into_temp_file "$COMMENT"
+# insert_into_temp_file "$COMMENT"
 
 function download() {
 
@@ -102,18 +106,19 @@ function download() {
             else
                 FREE_URL_INFIX="$(echo "${DATE}.zip" | base64)"
                 URL="${BASE_URL_FREE}/${FREE_URL_INFIX:0:-1}/nrd"
+				
             fi
-            curl -sSLo- "$URL" | zcat | tr -d '\015' >> "$FILE"
+            curl -sSLo- "$URL" | zcat | tr -d '\015' | while read line; do echo ${line},; done  >> "$FILE"
             echo "" >> "$FILE"
             echo.Cyan "$(grep -vc '^$' "$FILE") domains found."
         fi
-        insert_into_temp_file "# ${DATE} NRD start"
+#        insert_into_temp_file "# ${DATE} NRD start"
         cat "$FILE" >> "$TEMP_FILE"
-        insert_into_temp_file "# ${DATE} NRD end"
+#        insert_into_temp_file "# ${DATE} NRD end"
         i="$((i - 1))"
     done
 
-    insert_into_temp_file "$COMMENT"
+#    insert_into_temp_file "$COMMENT"
 
     chmod +r "$TEMP_FILE"
     mv "$TEMP_FILE" "$TARGET_FILE"
